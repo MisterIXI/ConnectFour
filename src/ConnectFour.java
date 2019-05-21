@@ -17,6 +17,10 @@ public class ConnectFour {
     }
 
     public ConnectFour(int boardWidth, int boardLength){
+        this(boardWidth, boardLength, 4);
+    }
+
+    public ConnectFour(int boardWidth, int boardLength, int winLength){
         playBoard = new BoardState[boardWidth][boardLength];
         for (int i = 0; i < playBoard.length; i++) {
             for (int j = 0; j < playBoard[0].length; j++) {
@@ -35,7 +39,7 @@ public class ConnectFour {
     When this is called with an invalid index, an IllegalAccessException is thrown.
     When this is called on a full column,an IllegalArgumentException is thrown.
      */
-    public boolean nextTurn(int posX) throws IllegalAccessException, IllegalArgumentException{
+    public boolean nextTurn(int posX) throws IllegalAccessException, IllegalArgumentException, IllegalCallerException{
         posX--;
         if(!isGameRunning)
             throw new IllegalCallerException("Game is already over! Can't excecute another turn.");
@@ -88,9 +92,9 @@ public class ConnectFour {
                 if(dirX != 0 || dirY == -1){
                     int tempX = X;
                     int tempY = Y;
-                    while(tempX >= 0 && tempX < playBoard.length &&
-                            tempY >= 0 && tempY < playBoard[0].length &&
-                            playBoard[tempX][tempY] == player){//run to "start" of chain
+                    while(tempX + dirX >= 0 && tempX + dirX < playBoard.length &&
+                            tempY + dirY >= 0 && tempY + dirY < playBoard[0].length &&
+                            playBoard[tempX + dirX][tempY + dirY] == player){//run to "start" of chain
                         tempX += dirX;
                         tempY += dirY;
                     }
