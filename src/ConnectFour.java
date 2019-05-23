@@ -11,6 +11,7 @@ public class ConnectFour {
     private boolean isGameRunning;
     private BoardState winner;
     private int turnCount;
+    private int piecesNeeded;
 
     public ConnectFour(){
         this(7,6);
@@ -31,6 +32,7 @@ public class ConnectFour {
         isGameRunning = true;
         winner = null;
         turnCount = 0;
+        piecesNeeded = winLength;
     }
 
     /*
@@ -101,13 +103,13 @@ public class ConnectFour {
                     int count = 0;
                     while(tempX >= 0 && tempX < playBoard.length &&
                             tempY >= 0 && tempY < playBoard[0].length &&
-                            count < 4 &&
+                            count < piecesNeeded &&
                             playBoard[tempX][tempY] == player) {//run to "end" of chain with max 4 steps
                         tempX -= dirX;
                         tempY -= dirY;
                         count++;
                     }
-                    if(count == 4)
+                    if(count == piecesNeeded)
                         result = true;
                 }
             }
