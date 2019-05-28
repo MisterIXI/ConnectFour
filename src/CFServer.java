@@ -10,8 +10,22 @@ public class CFServer {
 	private DataInputStream dataIn2 = null;
 	private DataOutputStream dataOut2 = null;
 
-	public CFServer(int port) {
+	private char charTopLeftCorner;
+	private char charHorizontalWall;
+	private char charTopCross;
+	private char charTopRightCorner;
+	private char charVerticalWall;
+	private char charLeftCross;
+	private char charRightCross;
+	private char charMiddleCross;
+	private char charBottomLeftCorner;
+	private char charBottomCross;
+	private char charBottomRightCorner;
+	private char charMoveIndicator;
+	
+	public CFServer(int port, boolean compatibilityModeEnabled) {
 		try {
+			initializeChars(compatibilityModeEnabled);
 			server = new ServerSocket(port);
 			System.out.println("Server started.");
 			System.out.println("Waiting for Player1...");
@@ -68,7 +82,10 @@ public class CFServer {
 						dataOut1.flush();
 						int height = validateNumScanner(2, dataOut1, dataIn1);
 						dataOut1.writeUTF("Pieces to win:");
+						dataOut1.flush();
 						int pieces = validateNumScanner(2, width > height ? width : height, false, dataOut1, dataIn1);
+						dataOut1.writeUTF("Game started with " + width + "x" + height + ", and you need " + pieces + " pieces to win. Good luck have fun! :)");
+						dataOut2.writeUTF("Game started with " + width + "x" + height + ", and you need " + pieces + " pieces to win. Good luck have fun! :)");
 						game = new ConnectFour(width, height, pieces);
 						break;
 					default:
@@ -190,15 +207,10 @@ public class CFServer {
 
 	private int menuSelection(DataOutputStream out, DataInputStream in) throws IOException {
 		out.writeUTF("Main Menu:");
-		out.flush();
 		out.writeUTF("1: play a standard game");
-		out.flush();
 		out.writeUTF("2: play a custom game");
-		out.flush();
 		out.writeUTF("3: exit...");
-		out.flush();
 		out.writeUTF("Please select one...");
-		out.flush();
 		out.writeUTF(" ");
 		out.flush();
 		return validateNumScanner(1, 3, false, out, in);
@@ -239,31 +251,31 @@ public class CFServer {
 		int currentX = 0;
 		int currentY = 0;
 		StringBuilder sB = new StringBuilder();
-		sB.append("\u250C");// corner top left
+		sB.append(charTopLeftCorner);// corner top left
 		for (int i = 1; i < board.length; i++) {
-			sB.append("\u2500\u2500\u2500\u252C");// top line
+			sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charTopCross);// top line
 		}
-		sB.append("\u2500\u2500\u2500\u2510"); // corner top right
+		sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charTopRightCorner); // corner top right
 		out.writeUTF(sB.toString());
 		out.flush();
 		sB = new StringBuilder();
 
 		for (int i = 0; i < board[0].length - 1; i++) {
 			for (int j = 0; j < board.length; j++) {
-				sB.append("\u2502");// vertical pillar
+				sB.append(charVerticalWall);// vertical pillar
 				printState(board[currentX++][currentY], sB);
 			}
-			sB.append("\u2502");// vertical pillar
+			sB.append(charVerticalWall);// vertical pillar
 			out.writeUTF(sB.toString());
 			sB = new StringBuilder();
 
 			currentY++;
 			currentX = 0;
-			sB.append("\u251C");// left side pillar
+			sB.append(charLeftCross);// left side pillar
 			for (int j = 1; j < board.length; j++) {
-				sB.append("\u2500\u2500\u2500\u253C");// middle cross
+				sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charMiddleCross);// middle cross
 			}
-			sB.append("\u2500\u2500\u2500\u2524");// right side pillar
+			sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charRightCross);// right side pillar
 			out.writeUTF(sB.toString());
 			out.flush();
 			sB = new StringBuilder();
@@ -271,19 +283,19 @@ public class CFServer {
 		}
 
 		for (int j = 0; j < board.length; j++) {
-			sB.append("\u2502");// vertical pillar
+			sB.append(charVerticalWall);// vertical pillar
 			printState(board[currentX++][currentY], sB);
 		}
-		sB.append("\u2502");// vertical pillar
+		sB.append(charVerticalWall);// vertical pillar
 		out.writeUTF(sB.toString());
 		out.flush();
 		sB = new StringBuilder();
 
-		sB.append("\u2514");// corner bottom left
+		sB.append(charBottomLeftCorner);// corner bottom left
 		for (int i = 1; i < board.length; i++) {
-			sB.append("\u2500\u2500\u2500\u2534");// bottom line
+			sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charBottomCross);// bottom line
 		}
-		sB.append("\u2500\u2500\u2500\u2518"); // corner bottom right
+		sB.append("" + charHorizontalWall + charHorizontalWall + charHorizontalWall + charBottomRightCorner); // corner bottom right
 		out.writeUTF(sB.toString());
 		out.flush();
 		sB = new StringBuilder();
@@ -304,13 +316,13 @@ public class CFServer {
 			for (int i = 1; i < markPos; i++) {
 				sB.append("    ");
 			}
-			sB.append("  \u2191");
+			sB.append("  " + charMoveIndicator);
 		}
 		out.writeUTF(sB.toString());
 		out.flush();
 	}
 
-	private static void printState(ConnectFour.BoardState x, StringBuilder sB) {
+	private void printState(ConnectFour.BoardState x, StringBuilder sB) {
 		sB.append(' ');
 		switch (x) {
 		case Red:
@@ -325,8 +337,45 @@ public class CFServer {
 		}
 		sB.append(' ');
 	}
-
+	
+	private void initializeChars(boolean combatibilityModeEnabled) {
+		if(!combatibilityModeEnabled) {
+			 charTopLeftCorner = '\u250C';
+			 charHorizontalWall = '\u2500';
+			 charTopCross = '\u252C';
+			 charTopRightCorner = '\u2510';
+			 charVerticalWall = '\u2502';
+			 charLeftCross = '\u251C';
+			 charRightCross = '\u2524';
+			 charMiddleCross = '\u253C';
+			 charBottomLeftCorner = '\u2514';
+			 charBottomCross = '\u2534';
+			 charBottomRightCorner = '\u2518';
+			 charMoveIndicator = '^';
+		}
+		else {
+			 charTopLeftCorner = '*';
+			 charHorizontalWall = '*';
+			 charTopCross = '*';
+			 charTopRightCorner = '*';
+			 charVerticalWall = '*';
+			 charLeftCross = '*';
+			 charRightCross = '*';
+			 charMiddleCross = '*';
+			 charBottomLeftCorner = '*';
+			 charBottomCross = '*';
+			 charBottomRightCorner = '*';
+			 charMoveIndicator = '^';
+		}
+	}
+	
 	public static void main(String[] args) {
-		CFServer x = new CFServer(54242);
+		CFServer x;
+		if(args.length == 0)
+			x = new CFServer(54242, false);
+		else if(args.length == 1)
+			x = new CFServer(Integer.parseInt(args[0]), false);
+		else
+			x = new CFServer(Integer.parseInt(args[0]), Boolean.parseBoolean(args[1]));
 	}
 }

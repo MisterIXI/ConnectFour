@@ -73,6 +73,12 @@ public class CFClient {
 	
 	
 	public static void main(String[] args) {
-		CFClient x = new CFClient("127.0.0.1", 54242);
+		CFClient x;
+		if(args.length == 1)
+			x = new CFClient(args[0], 54242);
+		else if(args.length == 2)
+			x = new CFClient(args[0], Integer.parseInt(args[1]));
+		else
+			System.out.println("Please provide at least the address. The port is optional. Aborting...");
 	}
 }
