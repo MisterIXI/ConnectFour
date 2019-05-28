@@ -12,6 +12,7 @@ public class ConnectFour {
     private BoardState winner;
     private int turnCount;
     private int piecesNeeded;
+    private int lastMove;
 
     public ConnectFour(){
         this(7,6);
@@ -33,6 +34,7 @@ public class ConnectFour {
         winner = null;
         turnCount = 0;
         piecesNeeded = winLength;
+        lastMove = -1;
     }
 
     /*
@@ -41,15 +43,15 @@ public class ConnectFour {
     When this is called with an invalid index, an IllegalAccessException is thrown.
     When this is called on a full column,an IllegalArgumentException is thrown.
      */
-    public boolean nextTurn(int posX) throws IllegalAccessException, IllegalArgumentException, IllegalCallerException{
+    public boolean nextTurn(int posX) throws IllegalAccessException, IllegalArgumentException, IllegalStateException{
         posX--;
         if(!isGameRunning)
-            throw new IllegalCallerException("Game is already over! Can't excecute another turn.");
+            throw new IllegalStateException("Game is already over! Can't excecute another turn.");
         if(posX >= playBoard.length)
             throw new IllegalAccessException("Given position is out of bounds!");
         if(playBoard[posX][0] != BoardState.Empty)
             throw new IllegalArgumentException("Column is already full! Illegal operation.");
-
+        lastMove = posX + 1;
         int posY = 0;
         while(playBoard[posX].length > posY + 1 && playBoard[posX][posY + 1] == BoardState.Empty){
             posY++;
@@ -132,5 +134,9 @@ public class ConnectFour {
 
     public BoardState getWinner(){
         return winner;
+    }
+    
+    public int getLastMove() {
+    	return lastMove;
     }
 }
